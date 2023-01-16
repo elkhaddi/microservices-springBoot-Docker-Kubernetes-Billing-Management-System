@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-client
+spec:
+  selector:
+    matchLabels:
+      app: service-client
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-client
+    spec:
+      containers:
+        - name: service-client
+          image: elkhaddi/ms:client-service
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env: # Setting Environmental Variables
+            - name: DB_HOST # Setting Database host address
+              value: mysqlserver
+            - name: PORT
+              value: "8081"
+            - name: DB_USERNAME # Setting Database username
+              value: root
+            - name: DB_PASSWORD # Setting Database password
+              value: root
+            - name: EUREKA_ADRESS
+              value: http://eureka-service-discovery.default.svc.cluster.local:8761/eureka
+---
+# Define a 'Service' To Expose the application
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-client
+spec:
+  ports:
+    - protocol: "TCP"
+      port: 8081 # Port inside the cluster
+      targetPort: 8081 # Port exposed to the outside
+  selector:
+    app: service-client

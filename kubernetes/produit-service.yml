@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-produit
+spec:
+  selector:
+    matchLabels:
+      app: service-produit
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-produit
+    spec:
+      containers:
+        - name: service-produit
+          image: elkhaddi/ms:produit-service
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env: # Setting Environmental Variables
+            - name: DB_HOST # Setting Database host address
+              value: mysqlserver
+            - name: PORT
+              value: "8082"
+            - name: DB_USERNAME # Setting Database username
+              value: root
+            - name: DB_PASSWORD # Setting Database password
+              value: root
+            - name: EUREKA_ADRESS
+              value: http://eureka-service-discovery.default.svc.cluster.local:8761/eureka
+---
+# Define a 'Service' To Expose the application
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-produit
+spec:
+  ports:
+    - protocol: "TCP"
+      port: 8082 # Port inside the cluster
+      targetPort: 8082 # Port exposed to the outside
+  selector:
+    app: service-produit

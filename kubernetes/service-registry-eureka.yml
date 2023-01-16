@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-service-discovery
+  labels:
+    app: eureka-service-discovery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-service-discovery
+  template:
+    metadata:
+      labels:
+        app: eureka-service-discovery
+    spec:
+      containers:
+        - name: eureka-service-discovery
+          image: elkhaddi/ms:eureka-service-discovery
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8761
+          env:
+            - name: EUREKA_ADRESS
+              value: http://eureka-service-discovery.default.svc.cluster.local:8761/eureka
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service-discovery
+spec:
+  type: NodePort
+  ports:
+    - port: 8761
+      targetPort: 8761
+      protocol: TCP
+  selector:
+    app: eureka-service-discovery
